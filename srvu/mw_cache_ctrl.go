@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-func WithCacheHeader(ttl time.Duration) Middleware {
+func WithCacheCtrlHeader(ttl time.Duration) Middleware {
 	if ttl <= 0 {
 		panic("ttl must be greater than 0")
 	}
