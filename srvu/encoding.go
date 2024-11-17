@@ -29,6 +29,15 @@ func Decode(r *http.Request, t any, acceptEmpty bool) error {
 		return nil
 	case "multipart/form-data", "application/x-www-form-urlencoded":
 		if p, ok := t.(FormParser); ok {
+			if ct == "multipart/form-data" {
+				if err := r.ParseMultipartForm(20 * 1024 * 1024); err != nil {
+					return Err(http.StatusBadRequest, fmt.Errorf("failed to parse form: %w", err))
+				}
+			} else {
+				if err := r.ParseForm(); err != nil {
+					return Err(http.StatusBadRequest, fmt.Errorf("failed to parse form: %w", err))
+				}
+			}
 			if err := p.FromForm(r); err != nil {
 				return Err(http.StatusBadRequest, fmt.Errorf("failed to parse form: %w", err))
 			}
