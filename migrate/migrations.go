@@ -62,6 +62,7 @@ func getMigratedVersions(ctx context.Context, q Queryer) ([]string, error) {
 
 func applyMigration(ctx context.Context, exec Execer, name string, b []byte) error {
 	if _, err := exec.ExecContext(ctx, string(b)); err != nil {
+		fmt.Printf("stmt: \n%s\n", string(b))
 		return fmt.Errorf("executing migration: %w", err)
 	}
 	if _, err := exec.ExecContext(ctx, "INSERT INTO schema_migrations (version) VALUES (?)", name); err != nil {
