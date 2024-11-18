@@ -1,4 +1,4 @@
-package srvu
+package templ
 
 import (
 	"fmt"
@@ -39,8 +39,24 @@ func (t TemplateProviderFunc) ExecuteTemplate(w io.Writer, name string, data int
 	return t().ExecuteTemplate(w, name, data)
 }
 
-func GetPublicAndTemplates(embeddedFS fs.FS, dir string, watch bool, public string, tmplPatterns ...string) (fs.FS, TemplateProvider, error) {
-	f, err := getFS(embeddedFS, dir, watch)
+type Config struct {
+	Watch            bool
+	Dir              string
+	RootTmplProvider func() *template.Template
+	Public           string
+	TmplPatterns     []string
+}
+
+func GetPublicAndTemplates(embeddedFS fs.FS, cfg *Config) (fs.FS, TemplateProvider, error) {
+	public := cfg.Public
+	if cfg.Public == "" {
+		public = "public"
+	}
+	dir := cfg.Dir
+	if dir == "" {
+		dir = "static"
+	}
+	f, err := getFS(embeddedFS, dir, cfg.Watch)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -49,13 +65,13 @@ func GetPublicAndTemplates(embeddedFS fs.FS, dir string, watch bool, public stri
 		return nil, nil, fmt.Errorf("failed to get public files: %v", err)
 	}
 	getTmpl := func() *template.Template {
-		tmpl, err := template.ParseFS(f, tmplPatterns...)
+		tmpl, err := cfg.RootTmplProvider().ParseFS(f, cfg.TmplPatterns...)
 		if err != nil {
 			log.Fatal(fmt.Errorf("failed to parse templates: %v", err))
 		}
 		return tmpl
 	}
-	if watch {
+	if cfg.Watch {
 		return publicFS, TemplateProviderFunc(getTmpl), nil
 	}
 	return publicFS, TemplateProviderFunc(sync.OnceValue(getTmpl)), nil
