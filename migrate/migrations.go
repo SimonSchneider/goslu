@@ -56,7 +56,7 @@ func getMigratedVersions(ctx context.Context, q Queryer) ([]string, error) {
 	existing := make([]string, 0)
 	for rows.Next() {
 		existing = append(existing, "")
-		rows.Scan(existing[len(existing)-1])
+		rows.Scan(&existing[len(existing)-1])
 	}
 	return existing, nil
 }
