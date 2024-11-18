@@ -112,6 +112,8 @@ func Migrate(ctx context.Context, dir fs.FS, db *sql.DB) error {
 		if i < len(alreadyMigratedVersions) {
 			if name != alreadyMigratedVersions[i] {
 				return fmt.Errorf("already ran migration '%s' as version [%d] but got name %s", alreadyMigratedVersions[i], i, name)
+			} else {
+				continue
 			}
 		}
 		b, err := readFile(dir, dirEntry.Name())
