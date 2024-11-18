@@ -26,11 +26,12 @@ func readFile(dir fs.FS, name string) ([]byte, error) {
 	inUp := false
 	up := make([]byte, 0)
 	for scanner.Scan() {
-		b := bytes.TrimSpace(scanner.Bytes())
-		if bytes.Equal(b, []byte(startDown)) {
+		b := scanner.Bytes()
+		trimmed := bytes.TrimSpace(b)
+		if bytes.Equal(trimmed, []byte(startDown)) {
 			break
 		}
-		if bytes.Equal(b, []byte(startUp)) {
+		if bytes.Equal(trimmed, []byte(startUp)) {
 			inUp = true
 		} else if inUp {
 			up = append(up, b...)
