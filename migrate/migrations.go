@@ -34,7 +34,7 @@ func readFile(dir fs.FS, name string) ([]byte, error) {
 		if bytes.Equal(trimmed, []byte(startUp)) {
 			inUp = true
 		} else if inUp {
-			up = append(up, b...)
+			up = append(append(up, ' '), b...)
 		}
 	}
 	return up, nil
