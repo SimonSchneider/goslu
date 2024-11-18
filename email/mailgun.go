@@ -59,6 +59,7 @@ func (m *Mailgun) SendEmail(ctx context.Context, email *Email) (string, error) {
 	if err := w.WriteField("text", email.Body); err != nil {
 		return "", fmt.Errorf("writing text: %w", err)
 	}
+	w.Close()
 	r, err := http.NewRequestWithContext(ctx, http.MethodPost, fmt.Sprintf("%s/v3/%s/messages", m.BaseURL, m.DomainName), bytes.NewReader(data.Bytes()))
 	if err != nil {
 		return "", fmt.Errorf("creating request: %w", err)
