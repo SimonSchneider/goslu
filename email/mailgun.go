@@ -25,7 +25,7 @@ func NewMailgun(client *http.Client, baseURL, apiKey, domainName string) *Mailgu
 	}
 }
 
-func addRecepient(w *multipart.Writer, key string, recipients []string) error {
+func addRecipient(w *multipart.Writer, key string, recipients []string) error {
 	for i, recipient := range recipients {
 		if err := w.WriteField(fmt.Sprintf("%s[%d]", key, i), recipient); err != nil {
 			return fmt.Errorf("writing %s: %w", key, err)
@@ -44,19 +44,19 @@ func (m *Mailgun) SendEmail(ctx context.Context, email *Email) (string, error) {
 	if err := w.WriteField("from", email.From); err != nil {
 		return "", fmt.Errorf("writing from: %w", err)
 	}
-	if err := addRecepient(w, "to", email.To); err != nil {
+	if err := addRecipient(w, "to", email.To); err != nil {
 		return "", err
 	}
-	if err := addRecepient(w, "cc", email.Cc); err != nil {
+	if err := addRecipient(w, "cc", email.Cc); err != nil {
 		return "", err
 	}
-	if err := addRecepient(w, "bcc", email.Bcc); err != nil {
+	if err := addRecipient(w, "bcc", email.Bcc); err != nil {
 		return "", err
 	}
 	if err := w.WriteField("subject", email.Subject); err != nil {
 		return "", fmt.Errorf("writing subject: %w", err)
 	}
-	if err := w.WriteField("text", email.Body); err != nil {
+	if err := w.WriteField("html", email.Body); err != nil {
 		return "", fmt.Errorf("writing text: %w", err)
 	}
 	w.Close()
