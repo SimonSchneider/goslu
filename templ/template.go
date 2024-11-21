@@ -52,6 +52,11 @@ func GetPublicAndTemplates(embeddedFS fs.FS, cfg *Config) (fs.FS, TemplateProvid
 	if cfg.Public == "" {
 		public = "public"
 	}
+	if cfg.RootTmplProvider == nil {
+		cfg.RootTmplProvider = func() *template.Template {
+			return template.New("")
+		}
+	}
 	dir := cfg.Dir
 	if dir == "" {
 		dir = "static"
