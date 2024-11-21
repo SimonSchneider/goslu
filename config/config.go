@@ -166,14 +166,14 @@ func (p *Parser) ParseInto(cfg any) error {
 				return nil
 			})
 		case reflect.String:
-			fld.field.SetString(envVal)
 			p.FlagSet.StringVar(&fields[i].strVal, flagName, fld.field.String(), fld.usage)
+			fld.field.SetString(envVal)
 		case reflect.Int, reflect.Int64:
-			fld.field.SetInt(parseInt(envVal))
 			p.FlagSet.Int64Var(&fields[i].intVal, flagName, fld.field.Int(), fld.usage)
+			fld.field.SetInt(parseInt(envVal))
 		case reflect.Uint, reflect.Uint64:
-			fld.field.SetUint(parseUint(envVal))
 			p.FlagSet.Uint64Var(&fields[i].uintVal, flagName, fld.field.Uint(), fld.usage)
+			fld.field.SetUint(parseUint(envVal))
 		default:
 			panic(fmt.Sprintf("unsupported kind: %s", fld.dt))
 		}

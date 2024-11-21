@@ -38,3 +38,19 @@ func TestParseInto(t *testing.T) {
 	}
 	t.Logf("%+v", cfg)
 }
+
+func TestParseWithDefaults(t *testing.T) {
+	type Cfg struct {
+		Foo string
+		Bar int
+	}
+	cfg := Cfg{
+		Foo: "foo",
+		Bar: 42,
+	}
+	fset := flag.NewFlagSet("", flag.ExitOnError)
+	if err := config.ParseInto(&cfg, fset, []string{}, func(k string) string { return "" }); err != nil {
+		t.Error(err)
+	}
+	t.Logf("%+v", cfg)
+}
