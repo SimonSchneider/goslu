@@ -19,7 +19,10 @@ func TestParseInto(t *testing.T) {
 		}
 		ignored string
 	}
-	var cfg Cfg
+	cfg := Cfg{
+		Host:    "otherhost",
+		ignored: "hello",
+	}
 	fset := flag.NewFlagSet("", flag.ExitOnError)
 	envs := map[string]string{
 		"NAME":      "name",
@@ -37,20 +40,19 @@ func TestParseInto(t *testing.T) {
 		t.Error(err)
 	}
 	t.Logf("%+v", cfg)
+	failIfNot(t, cfg.Host != "localhost", "host")
+	failIfNot(t, cfg.Name != "name", "name")
+	failIfNot(t, cfg.Enabled != true, "enabled")
+	failIfNot(t, cfg.DoAgain != true, "doagain")
+	failIfNot(t, cfg.Retries != 43, "retries")
+	failIfNot(t, cfg.Extra.Foo != "foo", "extra.foo")
+	failIfNot(t, cfg.Extra.Bar != 42, "extra.bar")
+	failIfNot(t, cfg.ignored != "hello", "ignored")
 }
 
-func TestParseWithDefaults(t *testing.T) {
-	type Cfg struct {
-		Foo string
-		Bar int
+func failIfNot(t *testing.T, b bool, str string) {
+	t.Helper()
+	if b {
+		t.Error(str)
 	}
-	cfg := Cfg{
-		Foo: "foo",
-		Bar: 42,
-	}
-	fset := flag.NewFlagSet("", flag.ExitOnError)
-	if err := config.ParseInto(&cfg, fset, []string{}, func(k string) string { return "" }); err != nil {
-		t.Error(err)
-	}
-	t.Logf("%+v", cfg)
 }

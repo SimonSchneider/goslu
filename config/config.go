@@ -160,20 +160,28 @@ func (p *Parser) ParseInto(cfg any) error {
 		envVal := p.GetEnv(envName)
 		switch fld.dt {
 		case reflect.Bool:
-			fld.field.SetBool(parseBool(envVal))
+			if parseBool(envVal) {
+				fld.field.SetBool(true)
+			}
 			p.FlagSet.BoolFunc(flagName, fld.usage, func(val string) error {
 				fld.field.SetBool(parseBool(val))
 				return nil
 			})
 		case reflect.String:
+			if envVal != "" {
+				fld.field.SetString(envVal)
+			}
 			p.FlagSet.StringVar(&fields[i].strVal, flagName, fld.field.String(), fld.usage)
-			fld.field.SetString(envVal)
 		case reflect.Int, reflect.Int64:
+			if envVal != "" {
+				fld.field.SetInt(parseInt(envVal))
+			}
 			p.FlagSet.Int64Var(&fields[i].intVal, flagName, fld.field.Int(), fld.usage)
-			fld.field.SetInt(parseInt(envVal))
 		case reflect.Uint, reflect.Uint64:
+			if envVal != "" {
+				fld.field.SetUint(parseUint(envVal))
+			}
 			p.FlagSet.Uint64Var(&fields[i].uintVal, flagName, fld.field.Uint(), fld.usage)
-			fld.field.SetUint(parseUint(envVal))
 		default:
 			panic(fmt.Sprintf("unsupported kind: %s", fld.dt))
 		}
