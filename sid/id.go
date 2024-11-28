@@ -2,14 +2,12 @@ package sid
 
 import (
 	"crypto/rand"
+	"github.com/SimonSchneider/goslu/syncu"
 	"math/big"
 	"slices"
-	"sync"
 )
 
-var bufPool = &sync.Pool{New: func() any {
-	return make([]byte, 0)
-}}
+var bufPool = syncu.NewPool(func() []byte { return make([]byte, 0) })
 
 const letters = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-"
 const lettersLen = int64(len(letters))
@@ -17,7 +15,7 @@ const lettersLen = int64(len(letters))
 var lettersBigLen = big.NewInt(lettersLen)
 
 func bufWithLen(n int) []byte {
-	buf := bufPool.Get().([]byte)
+	buf := bufPool.Get()
 	if cap(buf) < n {
 		buf = slices.Grow(buf, n-len(buf))
 	}
