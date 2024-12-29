@@ -6,6 +6,11 @@ import (
 	"net/http"
 )
 
+type capturingRW interface {
+	http.ResponseWriter
+	Status() int
+}
+
 type capturingResponseWriter struct {
 	http.ResponseWriter
 	status int
@@ -23,6 +28,19 @@ func (w *capturingResponseWriter) WriteHeader(statusCode int) {
 	w.ResponseWriter.WriteHeader(statusCode)
 }
 
+func (w *capturingResponseWriter) Status() int {
+	return w.status
+}
+
+type capturingResponseWriterWithFlush struct {
+	capturingRW
+	http.Flusher
+}
+
+func (w *capturingResponseWriterWithFlush) Flush() {
+	w.Flusher.Flush()
+}
+
 func WithLogger(logger Logger) Middleware {
 	return func(h http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -30,10 +48,13 @@ func WithLogger(logger Logger) Middleware {
 				logger.Printf("request: %s %s", r.Method, r.URL)
 			}
 			r = r.WithContext(ContextWithLogger(r.Context(), logger))
-			cw := &capturingResponseWriter{ResponseWriter: w}
+			var cw capturingRW = &capturingResponseWriter{ResponseWriter: w}
+			if f, ok := w.(http.Flusher); ok {
+				cw = &capturingResponseWriterWithFlush{capturingRW: cw, Flusher: f}
+			}
 			h.ServeHTTP(cw, r)
 			//if r.Method != http.MethodHead {
-			logger.Printf("response: %s %s %d", r.Method, r.URL, cw.status)
+			logger.Printf("response: %s %s %d", r.Method, r.URL, cw.Status())
 			//}
 		})
 	}
